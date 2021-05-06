@@ -16,7 +16,7 @@
 
   "environment": "*",
   "mixins": [
-    "lengthyladders.mixins.json"
+    "OCAIP.mixins.json"
   ],
 
   "depends": {

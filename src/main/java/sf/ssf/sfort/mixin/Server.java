@@ -14,13 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class Server {
 	@Final @Shadow
 	public final boolean onlineMode = false;
-	@Inject(method = "setOnlineMode(Z)V",
-	at=@At("HEAD"), cancellable = true)
+	@Inject(method = "setOnlineMode(Z)V", at=@At("HEAD"), cancellable = true)
 	public void setOnlineMode(boolean onlineMode, CallbackInfo ci){
 		ci.cancel();
 	}
-	@Inject(method = "isOnlineMode()Z",
-			at=@At("HEAD"), cancellable = true)
+	@Inject(method = "isOnlineMode()Z", at=@At("HEAD"), cancellable = true)
 	public void isOnlineMode(CallbackInfoReturnable<Boolean> cir){
 		cir.setReturnValue(false);
 	}
