@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "lengthyladders",
+  "version": "${version}",
+
+  "name": "Lengthy Ladders",
+  "description": "Allows stacking ladders",
+  "authors": [
+    "SFort"
+  ],
+  "contact": {
+    "sources": "https://github.com/SFort/MC-lengthyladders"
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "mixins": [
+    "lengthyladders.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "*"
+  }
+}
