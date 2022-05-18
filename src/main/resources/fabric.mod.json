@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "id": "lengthyladders",
+  "id": "ocaip",
   "version": "${version}",
 
-  "name": "Lengthy Ladders",
-  "description": "Allows stacking ladders",
+  "name": "OCAIP - Offline Customization And Identification Protocol",
+  "description": "Ensures players can't take each others accounts while auth servers are unreachable",
   "authors": [
     "SFort"
   ],
   "contact": {
-    "sources": "https://github.com/SFort/MC-lengthyladders"
+    "sources": "https://github.com/SFort/MC-OCAIP"
   },
 
   "license": "MIT",
-
+  "accessWidener": "ocaip.accesswidener",
   "environment": "*",
   "mixins": [
     "OCAIP.mixins.json"

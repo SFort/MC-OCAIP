@@ -1,13 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "sf.ssf.sfort.mixin",
+  "package": "sf.ssf.sfort.ocaip.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "Server",
-    "SPropertieHandler"
+    "NetServerLogin"
   ],
   "client": [
+    "NetClientLogin"
   ],
   "injectors": {
     "defaultRequire": 1

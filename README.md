@@ -2,11 +2,7 @@
 
 Todo:
 
-- [ ] Ident verification
-- [ ] Ident whitelist
-- [ ] Skins
-- [ ] Capes
-  
-Maybe:
-
-- [ ] Allow multiple same-username players
+- [x] Id verification login
+- [ ] Require one time pass to bypass
+- [ ] Local Skins
+- [ ] Local Capes

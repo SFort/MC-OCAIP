@@ -1,0 +1,124 @@
+package sf.ssf.sfort.ocaip.mixin;
+
+import com.mojang.authlib.GameProfile;
+import io.netty.buffer.Unpooled;
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
+import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import sf.ssf.sfort.ocaip.Reel;
+import sf.ssf.sfort.ocaip.Wire;
+
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Random;
+import java.util.UUID;
+
+@Mixin(ServerLoginNetworkHandler.class)
+public abstract class NetServerLogin {
+
+	boolean ocaip$hasBypassed = false;
+	byte[] ocaip$sentBytes = null;
+
+	@Shadow
+    ServerLoginNetworkHandler.State state;
+	@Shadow @Final
+    public ClientConnection connection;
+	@Shadow
+    GameProfile profile;
+	@Shadow
+    protected abstract GameProfile toOfflineProfile(GameProfile profile);
+	@Shadow
+    public abstract void disconnect(Text reason);
+	@Shadow @Final
+    private static Random RANDOM;
+
+    @Inject(at=@At("HEAD"), method="onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V")
+	public void submitAuthRequest(CallbackInfo ci) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeVarInt(Reel.protocalVersion);
+        byte[] bytes = new byte[256];
+        RANDOM.nextBytes(bytes);
+        buf.writeByteArray(bytes);
+        connection.send(new LoginQueryRequestS2CPacket(41809951, new Identifier("ocaip", "request_auth"), buf));
+        ocaip$sentBytes = bytes;
+    }
+
+	@Inject(at = @At(value="INVOKE", target="Ljava/lang/Thread;start()V", shift=At.Shift.BEFORE), method="onKey(Lnet/minecraft/network/packet/c2s/login/LoginKeyC2SPacket;)V", cancellable=true)
+	public void bypassAuthPacket(CallbackInfo ci) {
+		this.profile = this.toOfflineProfile(this.profile);
+		if (ocaip$hasBypassed) {
+            this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+			ci.cancel();
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method="onQueryResponse(Lnet/minecraft/network/packet/c2s/login/LoginQueryResponseC2SPacket;)V", cancellable=true)
+	public void bypassAuthPacket(LoginQueryResponseC2SPacket packet, CallbackInfo ci) {
+		if (packet.getQueryId() == 41809951) {
+            ci.cancel();
+            PacketByteBuf buf = packet.getResponse();
+            if (ocaip$sentBytes == null || buf == null) {
+                return;
+            }
+            int version = buf.readVarInt();
+            byte[] pubKeyRecv = buf.readByteArray();
+            String name = profile.getName();
+            UUID uuid = PlayerEntity.getOfflinePlayerUuid(name);
+            byte[] recvBytes = buf.readByteArray();
+            PublicKey pubKey = Wire.keys.get(uuid);
+            EdDSAEngine engine = new EdDSAEngine();
+            PublicKey recvKey;
+            try {
+                recvKey = new EdDSAPublicKey(new X509EncodedKeySpec(pubKeyRecv));
+            } catch (Exception ignore) {
+                this.disconnect(new LiteralText("OCAIP: Failed to read public key"));
+                return;
+            }
+            //TODO prompt password if password whitelisting is enabled and pubKey == null
+            if (pubKey != null) {
+                if (pubKey.hashCode() != recvKey.hashCode()) {
+                    this.disconnect(new LiteralText("OCAIP: Key already exists for this user, change username or contact admin"));
+                    return;
+                }
+            } else {
+                try {
+                    Wire.addAndWrite(uuid, recvKey);
+                } catch (Exception e) {
+                    Reel.log.error("Failed to save new user", e);
+                }
+            }
+            try {
+                engine.initVerify(recvKey);
+                if (!engine.verifyOneShot(ocaip$sentBytes, recvBytes)) {
+                    this.disconnect(new LiteralText("OCAIP: Signature invalid for sent bytes"));
+                    return;
+                }
+            } catch (SignatureException exception) {
+                this.disconnect(new LiteralText("OCAIP: Got invalid sig"));
+                return;
+            } catch (InvalidKeyException exception) {
+                this.disconnect(new LiteralText("OCAIP: Got invalid key"));
+                return;
+            }
+            Reel.log.info("Username "+name+" bypassed auth");
+            ocaip$hasBypassed = true;
+        }
+	}
+
+}
