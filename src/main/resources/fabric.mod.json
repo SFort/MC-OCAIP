@@ -16,7 +16,7 @@
   "accessWidener": "ocaip.accesswidener",
   "environment": "*",
   "mixins": [
-    "OCAIP.mixins.json"
+    "ocaip.mixins.json"
   ],
 
   "depends": {

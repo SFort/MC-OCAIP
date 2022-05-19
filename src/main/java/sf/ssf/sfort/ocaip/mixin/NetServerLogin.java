@@ -7,6 +7,7 @@ import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
@@ -49,13 +50,16 @@ public abstract class NetServerLogin {
     private static Random RANDOM;
 
     @Inject(at=@At("HEAD"), method="onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V")
-	public void submitAuthRequest(CallbackInfo ci) {
+	public void submitAuthRequest(LoginHelloC2SPacket packet, CallbackInfo ci) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeVarInt(Reel.protocalVersion);
         byte[] bytes = new byte[256];
         RANDOM.nextBytes(bytes);
         buf.writeByteArray(bytes);
-        connection.send(new LoginQueryRequestS2CPacket(41809951, new Identifier("ocaip", "request_auth"), buf));
+        connection.send(new LoginQueryRequestS2CPacket(
+                Wire.password == null || Wire.keys.containsKey(PlayerEntity.getOfflinePlayerUuid(packet.getProfile().getName())) ? 41809951 : 41809952,
+                new Identifier("ocaip", "request_auth"),
+                buf));
         ocaip$sentBytes = bytes;
     }
 
@@ -70,7 +74,8 @@ public abstract class NetServerLogin {
 
 	@Inject(at = @At("HEAD"), method="onQueryResponse(Lnet/minecraft/network/packet/c2s/login/LoginQueryResponseC2SPacket;)V", cancellable=true)
 	public void bypassAuthPacket(LoginQueryResponseC2SPacket packet, CallbackInfo ci) {
-		if (packet.getQueryId() == 41809951) {
+        int pid = packet.getQueryId();
+		if (pid == 41809951 || pid == 41809952) {
             ci.cancel();
             PacketByteBuf buf = packet.getResponse();
             if (ocaip$sentBytes == null || buf == null) {
@@ -90,13 +95,19 @@ public abstract class NetServerLogin {
                 this.disconnect(new LiteralText("OCAIP: Failed to read public key"));
                 return;
             }
-            //TODO prompt password if password whitelisting is enabled and pubKey == null
             if (pubKey != null) {
                 if (pubKey.hashCode() != recvKey.hashCode()) {
                     this.disconnect(new LiteralText("OCAIP: Key already exists for this user, change username or contact admin"));
                     return;
                 }
             } else {
+                if (Wire.password != null){
+                    String recvPass = buf.readString();
+                    if (!Wire.password.equals(recvPass)) {
+                        this.disconnect(new LiteralText("OCAIP: Wrong Password"));
+                        return;
+                    }
+                }
                 try {
                     Wire.addAndWrite(uuid, recvKey);
                 } catch (Exception e) {
