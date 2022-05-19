@@ -19,7 +19,7 @@ import java.util.Base64;
 @Environment(EnvType.CLIENT)
 public class Tape {
 	public static KeyPair key;
-	public static final Path path = new File("OCAIP.key").toPath();
+	public static final Path path = new File("ocaip.key").toPath();
 	static {
 		try {
 			byte[] seed = Base64.getDecoder().decode(Files.readString(path));

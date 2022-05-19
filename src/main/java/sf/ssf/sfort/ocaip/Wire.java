@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Wire {
-	public static final File conf = new File("OCAIP.keys");
+	public static final File conf = new File("ocaip.keys");
 	public static Map<UUID, PublicKey> keys = new HashMap<>();
 	public static String password = null;
 
