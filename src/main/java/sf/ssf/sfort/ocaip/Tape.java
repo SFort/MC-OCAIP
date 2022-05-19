@@ -21,6 +21,7 @@ public class Tape {
 	public static KeyPair key;
 	public static final Path path = new File("ocaip.key").toPath();
 	static {
+		Reel.createDir();
 		try {
 			byte[] seed = Base64.getDecoder().decode(Files.readString(path));
 			EdDSAPrivateKeySpec privKey = new EdDSAPrivateKeySpec(seed, Reel.edParams);

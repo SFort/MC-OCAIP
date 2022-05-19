@@ -1,5 +1,7 @@
 package sf.ssf.sfort.ocaip;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 import java.io.File;
@@ -13,9 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+@Environment(EnvType.SERVER)
 public class Wire {
-	public static final File conf = new File("ocaip.keys");
+	public static final File conf = new File("ocaip/server_keys");
 	public static Map<UUID, PublicKey> keys = new HashMap<>();
 	public static String password = null;
 
@@ -29,8 +31,9 @@ public class Wire {
 	}
 
 	static {
+		Reel.createDir();
 		try {
-			String s = Files.readString(new File("ocaip.pass").toPath()).trim();
+			String s = Files.readString(new File("ocaip/password").toPath()).trim();
 			if (!s.isBlank()) password = s;
 		} catch (Exception ignore) {
 		}
