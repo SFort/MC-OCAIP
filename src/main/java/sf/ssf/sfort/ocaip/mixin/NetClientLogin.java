@@ -1,5 +1,6 @@
 package sf.ssf.sfort.ocaip.mixin;
 
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import io.netty.buffer.Unpooled;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.minecraft.client.MinecraftClient;
@@ -33,10 +34,14 @@ public abstract class NetClientLogin {
 	@Shadow @Final private MinecraftClient client;
 	@Shadow @Final private @Nullable Screen parentScreen;
 
-	@Inject(at=@At("HEAD"), method="joinServerSession(Ljava/lang/String;)Lnet/minecraft/text/Text;", cancellable=true)
-	public void ditchYggdrasil(CallbackInfoReturnable<Text> cir) {
+	@Inject(at=@At("RETURN"), method="joinServerSession(Ljava/lang/String;)Lnet/minecraft/text/Text;", cancellable=true)
+	public void ignoreYggdrasilErr(CallbackInfoReturnable<Text> cir) {
 		if (ocaip$recivedRequest) {
-			cir.setReturnValue(null);
+			if (cir.getReturnValue() == null){
+				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion)));
+			} else {
+				cir.setReturnValue(null);
+			}
 		}
 	}
 

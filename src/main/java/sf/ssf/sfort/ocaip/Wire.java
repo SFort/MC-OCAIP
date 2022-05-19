@@ -14,20 +14,25 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 @Environment(EnvType.SERVER)
 public class Wire {
 	public static final File conf = new File("ocaip/server_keys");
-	public static Map<UUID, PublicKey> keys = new HashMap<>();
+
+	public static Map<String, PublicKey> keys = new HashMap<>();
 	public static String password = null;
 
-	public static void addAndWrite(UUID uuid, PublicKey key) throws IOException {
-		keys.put(uuid, key);
-		StringBuilder sb = new StringBuilder();
-		for (Map.Entry<UUID, PublicKey> entry : keys.entrySet()) {
-			sb.append(entry.getKey().toString()).append('\n').append(Base64.getEncoder().encodeToString(entry.getValue().getEncoded())).append('\n');
+	public static void addAndWrite(String name, PublicKey key) throws IOException {
+		if (!keys.containsKey(name)) {
+			keys.put(name, key);
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, PublicKey> entry : keys.entrySet()) {
+				sb.append(entry.getKey()).append('\n');
+				if (entry.getValue() != null)
+					sb.append(Base64.getEncoder().encodeToString(entry.getValue().getEncoded()));
+				sb.append('\n');
+			}
+			Files.writeString(conf.toPath(), sb);
 		}
-		Files.writeString(conf.toPath(), sb);
 	}
 
 	static {
@@ -39,8 +44,10 @@ public class Wire {
 		}
 		try {
 			List<String> ln = Files.readAllLines(conf.toPath());
-			for (int i = 1; i <= ln.size() / 2; i += 2)
-				keys.put(UUID.fromString(ln.get(i - 1)), new EdDSAPublicKey(new X509EncodedKeySpec(Base64.getDecoder().decode(ln.get(i)))));
+			for (int i = 1; i <= ln.size() / 2; i += 2) {
+				String s = ln.get(i);
+				keys.put(ln.get(i - 1), s.isBlank() ? null : new EdDSAPublicKey(new X509EncodedKeySpec(Base64.getDecoder().decode(s))));
+			}
 		} catch (FileSystemException e) {
 			try {
 				conf.createNewFile();
