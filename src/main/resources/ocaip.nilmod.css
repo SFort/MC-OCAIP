@@ -1,0 +1,10 @@
+@nilmod {
+	name: "OCAIP - Offline Customization And Identification Protocol";
+	description: "Ensures players can't take each others accounts while auth servers are unreachable.";
+	authors: "sfort";
+	version: "${version}";
+}
+
+entrypoints {
+	premain: "sf.ssf.sfort.ocaip.Reel";
+}

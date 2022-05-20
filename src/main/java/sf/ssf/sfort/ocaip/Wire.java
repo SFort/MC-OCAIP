@@ -1,11 +1,10 @@
 package sf.ssf.sfort.ocaip;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.security.PublicKey;
@@ -14,7 +13,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-@Environment(EnvType.SERVER)
 public class Wire {
 	public static final File conf = new File("ocaip/server_keys");
 
@@ -31,7 +29,7 @@ public class Wire {
 					sb.append(Base64.getEncoder().encodeToString(entry.getValue().getEncoded()));
 				sb.append('\n');
 			}
-			Files.writeString(conf.toPath(), sb);
+			Files.write(conf.toPath(), sb.toString().getBytes(StandardCharsets.UTF_8));
 		}
 	}
 

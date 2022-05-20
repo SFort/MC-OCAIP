@@ -1,10 +1,10 @@
-package sf.ssf.sfort.ocaip.mixin;
+package sf.ssf.sfort.ocaip.nil;
 
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
+import jdk.internal.org.objectweb.asm.tree.ClassNode;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
@@ -14,6 +14,8 @@ import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import nilloader.api.lib.mini.MiniTransformer;
+import nilloader.api.lib.mini.annotation.Patch;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,10 +30,10 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
-import java.util.UUID;
 
 @Mixin(ServerLoginNetworkHandler.class)
-public abstract class NetServerLogin {
+@Patch.Class("net.minecraft.server.network.ServerLoginNetworkHandler")
+public class NetServerLogin extends MiniTransformer {
 
 	boolean ocaip$hasBypassed = false;
     boolean ocaip$shouldBypass = true;
