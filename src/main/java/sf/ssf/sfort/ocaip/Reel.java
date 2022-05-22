@@ -58,11 +58,11 @@ public class Reel implements Runnable {
 					transformer.addN(c->c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$pass", Type.getDescriptor(String.class), null, null)));
 					break;
 				case "net/minecraft/client/network/ClientLoginNetworkHandler":
-					transformer.addN(c->c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$recivedRequest", Type.getDescriptor(byte.class), null, 0)));
+					transformer.addN(c->c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$recivedRequest", Type.getDescriptor(boolean.class), null, 0)));
 					break;
 				case "net/minecraft/server/network/ServerLoginNetworkHandler":
 					transformer.addN(c->{
-						c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$hasBypassed", Type.getDescriptor(byte.class), null, 0));
+						c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$hasBypassed", Type.getDescriptor(byte.class), null, 0b01));
 						c.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "ocaip$sentBytes", Type.getDescriptor(byte[].class), null, 0));
 					});
 					break;

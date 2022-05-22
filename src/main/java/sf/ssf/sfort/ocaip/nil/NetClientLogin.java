@@ -14,7 +14,6 @@ import nilloader.api.lib.asm.tree.LabelNode;
 import nilloader.api.lib.mini.MiniTransformer;
 import nilloader.api.lib.mini.PatchContext;
 import nilloader.api.lib.mini.annotation.Patch;
-import sf.ssf.sfort.ocaip.OCAIPPassworded;
 import sf.ssf.sfort.ocaip.PasswordScreen;
 import sf.ssf.sfort.ocaip.Reel;
 import sf.ssf.sfort.ocaip.Tape;
@@ -31,11 +30,11 @@ public abstract class NetClientLogin extends MiniTransformer {
 		ctx.add(
 				ALOAD(0),
 				DUP(),
-				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "client","net/minecraft/client/MinecraftClient"),
+				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "client","Lnet/minecraft/client/MinecraftClient;"),
 				ALOAD(0),
-				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "connection", "net/minecraft/network/ClientConnection"),
+				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "connection", "Lnet/minecraft/network/ClientConnection;"),
 				ALOAD(0),
-				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "parentScreen", "net/minecraft/client/gui/screen/Screen"),
+				GETFIELD("net/minecraft/client/network/ClientLoginNetworkHandler", "parentScreen", "Lnet/minecraft/client/gui/screen/Screen;"),
 				ALOAD(1),
 				INVOKESTATIC("sf/ssf/sfort/ocaip/nil/NetClientLogin$Hooks", "bypassAuthPacket", "(Lnet/minecraft/client/network/ClientLoginNetworkHandler;Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/network/ClientConnection;Lnet/minecraft/client/gui/screen/Screen;Lnet/minecraft/network/packet/s2c/login/LoginQueryRequestS2CPacket;)Z"),
 				IFEQ(LABEL),
@@ -96,12 +95,13 @@ public abstract class NetClientLogin extends MiniTransformer {
 				}
 				PacketByteBuf tbuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion).writeByteArray(Tape.key.getPublic().getEncoded()).writeByteArray(bytes);
 				if (pid == 41809952) {
-					if (!(client.currentScreen instanceof OCAIPPassworded)) {
-						connection.handleDisconnection();
-						client.setScreen(parentScreen);
+					String pass;
+					try {
+						pass = (String) Screen.class.getField("ocaip$pass").get(self);
+					} catch (Exception e) {
+						Reel.log.error("Failed to get pass filed", e);
 						return false;
 					}
-					String pass = ((OCAIPPassworded) client.currentScreen).ocaip$getPassword();
 					if (pass == null) {
 						connection.handleDisconnection();
 						if (connection.getAddress() instanceof InetSocketAddress) {
