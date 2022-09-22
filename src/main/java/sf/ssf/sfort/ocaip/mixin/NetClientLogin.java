@@ -1,9 +1,9 @@
 package sf.ssf.sfort.ocaip.mixin;
 
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import io.netty.buffer.Unpooled;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientLoginNetworkHandler;
 import net.minecraft.network.ClientConnection;
@@ -19,8 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import sf.ssf.sfort.ocaip.OCAIPPassworded;
-import sf.ssf.sfort.ocaip.PasswordScreen;
+import sf.ssf.sfort.ocaip.AuthScreen;
 import sf.ssf.sfort.ocaip.Reel;
 import sf.ssf.sfort.ocaip.Tape;
 
@@ -49,10 +48,15 @@ public abstract class NetClientLogin {
 	public void bypassAuthPacket(LoginQueryRequestS2CPacket packet, CallbackInfo ci) {
 		int pid = packet.getQueryId();
 		if (pid == 41809951 || pid == 41809952) {
+			ci.cancel();
 			ocaip$recivedRequest = true;
 			PacketByteBuf buf = packet.getPayload();
 			if (buf == null) return;
 			int version = buf.readVarInt();
+			if (pid != 41809951 && version <= 1) {
+				this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server running an incompatible version of OCAIP")));
+				return;
+			}
 			byte[] bytes = buf.readByteArray();
 			EdDSAEngine engine = new EdDSAEngine();
 			try {
@@ -63,26 +67,42 @@ public abstract class NetClientLogin {
 			}
 			PacketByteBuf tbuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion).writeByteArray(Tape.key.getPublic().getEncoded()).writeByteArray(bytes);
 			if (pid == 41809952) {
-				if (!(this.client.currentScreen instanceof OCAIPPassworded)){
-					this.connection.handleDisconnection();
-					this.client.setScreen(parentScreen);
+				int authTags = buf.readVarInt();
+				if (authTags <= 0 || authTags > 0b11) {
+					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested unknown authentication type")));
 					return;
 				}
-				String pass = ((OCAIPPassworded)this.client.currentScreen).ocaip$getPassword();
-				if (pass == null) {
+				if (Tape.auth == null) {
 					this.connection.handleDisconnection();
 					if (this.connection.getAddress() instanceof InetSocketAddress) {
-						this.client.setScreen(new PasswordScreen((InetSocketAddress)this.connection.getAddress(), this.parentScreen));
+						this.client.setScreen(new AuthScreen(
+								(InetSocketAddress)this.connection.getAddress(),
+								this.parentScreen,
+								(authTags & 0b1) != 0,
+								(authTags & 0b10) != 0 ? buf.readString() : null
+						));
 					} else {
 						client.setScreen(this.parentScreen);
 					}
 					return;
 				}
-				tbuf.writeString(pass);
+				if ((authTags & 0b1) != 0) {
+					if (Tape.auth.pass == null) {
+						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No password was entered when it's required")));
+						return;
+					}
+					tbuf.writeString(Tape.auth.pass);
+				}
+				if ((authTags & 0b10) != 0) {
+					if (Tape.auth.pow == null) {
+						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No pow was generated when it's required")));
+						return;
+					}
+					tbuf.writeString(Tape.auth.pow);
+				}
 			}
+			Tape.auth = null;
 			this.connection.send(new LoginQueryResponseC2SPacket(packet.getQueryId(), tbuf));
-			ci.cancel();
-
 		}
 	}
 

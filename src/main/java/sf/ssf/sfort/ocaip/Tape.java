@@ -20,6 +20,7 @@ import java.util.Base64;
 public class Tape {
 	public static KeyPair key;
 	public static final Path path = new File("ocaip.key").toPath();
+	public static AuthObject auth = null;
 	static {
 		Reel.createDir();
 		try {

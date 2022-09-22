@@ -11,7 +11,7 @@ import java.nio.file.Files;
 
 public class Reel {
 	public static final Logger log = LogManager.getLogger("OCAIP");
-	public static final int protocalVersion = 1;
+	public static final int protocalVersion = 2;
 	public static final EdDSAParameterSpec edParams = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 
 	public static void createDir(){

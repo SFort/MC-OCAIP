@@ -7,8 +7,7 @@
     "NetServerLogin"
   ],
   "client": [
-    "NetClientLogin",
-    "ConnectScreenMixin"
+    "NetClientLogin"
   ],
   "injectors": {
     "defaultRequire": 1

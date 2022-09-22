@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
@@ -28,7 +27,6 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
-import java.util.UUID;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class NetServerLogin {
@@ -57,8 +55,16 @@ public abstract class NetServerLogin {
 		byte[] bytes = new byte[256];
 		RANDOM.nextBytes(bytes);
 		buf.writeByteArray(bytes);
+		String name = packet.getProfile().getName();
+		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null) ? 41809951 : 41809952;
+		if (requestCode == 41809952) {
+			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10));
+			if (Wire.pow != null) {
+				buf.writeString(Wire.pow.genPrompt(name, RANDOM));
+			}
+		}
 		connection.send(new LoginQueryRequestS2CPacket(
-				Wire.password == null || Wire.keys.containsKey(packet.getProfile().getName()) ? 41809951 : 41809952,
+				requestCode,
 				new Identifier("ocaip", "request_auth"),
 				buf));
 		ocaip$sentBytes = bytes;
@@ -90,6 +96,10 @@ public abstract class NetServerLogin {
 				return;
 			}
 			int version = buf.readVarInt();
+			if (pid != 41809951 && version <= 1) {
+				this.disconnect(Text.of("Client running an incompatible version of OCAIP"));
+				return;
+			}
 			byte[] pubKeyRecv = buf.readByteArray();
 			String name = profile.getName();
 			byte[] recvBytes = buf.readByteArray();
@@ -112,9 +122,18 @@ public abstract class NetServerLogin {
 				return;
 			} else {
 				if (Wire.password != null){
-					String recvPass = buf.readString();
-					if (!Wire.password.equals(recvPass)) {
+					if (!Wire.password.equals(buf.readString())) {
 						this.disconnect(new LiteralText("OCAIP: Wrong Password"));
+						return;
+					}
+				}
+				if (Wire.pow != null) {
+					if (!Wire.pow.sessionQueries.containsKey(profile.getName())) {
+						this.disconnect(new LiteralText("OCAIP: Server doesn't remember prompting proof of work"));
+						return;
+					}
+					if (!Wire.pow.isResponseValid(profile.getName(), buf.readString())) {
+						this.disconnect(new LiteralText("OCAIP: Invalid proof of work"));
 						return;
 					}
 				}
@@ -124,6 +143,7 @@ public abstract class NetServerLogin {
 					Reel.log.error("Failed to save new user", e);
 				}
 			}
+
 			try {
 				engine.initVerify(recvKey);
 				if (!engine.verifyOneShot(ocaip$sentBytes, recvBytes)) {
