@@ -1,7 +1,5 @@
 package sf.ssf.sfort.ocaip;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -115,8 +113,12 @@ public class POW {
 		if (recvPows.length != pows.length) return false;
 		for (int i=0; i<pows.length; i++){
 			if (!recvPows[i].startsWith(pows[i])) return false;
-			if (leadingZeros(recvPows[i])<this.count) return false;
+			if (leadingZeros(recvPows[i])<this.count){
+				sessionQueries.remove(name);
+				return false;
+			}
 		}
+		sessionQueries.remove(name);
 		return true;
 	}
 }

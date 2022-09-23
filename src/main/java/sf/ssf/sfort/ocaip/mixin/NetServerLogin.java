@@ -60,7 +60,10 @@ public abstract class NetServerLogin {
 		if (requestCode == 41809952) {
 			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10));
 			if (Wire.pow != null) {
-				buf.writeString(Wire.pow.genPrompt(name, RANDOM));
+				String ip = connection.getAddress().toString();
+				int i = ip.lastIndexOf(':');
+				if (i!=-1) ip = ip.substring(0, i);
+				buf.writeString(Wire.pow.genPrompt(name+ip, RANDOM));
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
@@ -121,19 +124,25 @@ public abstract class NetServerLogin {
 				this.disconnect(new LiteralText("OCAIP: Key already exists for this user, change username or contact admin"));
 				return;
 			} else {
-				if (Wire.password != null){
-					if (!Wire.password.equals(buf.readString())) {
-						this.disconnect(new LiteralText("OCAIP: Wrong Password"));
-						return;
-					}
-				}
+				String recvPass = null;
 				if (Wire.pow != null) {
-					if (!Wire.pow.sessionQueries.containsKey(profile.getName())) {
+					String ip = connection.getAddress().toString();
+					int i = ip.lastIndexOf(':');
+					if (i!=-1) ip = ip.substring(0, i);
+					ip = profile.getName() + ip;
+					if (!Wire.pow.sessionQueries.containsKey(ip)) {
 						this.disconnect(new LiteralText("OCAIP: Server doesn't remember prompting proof of work"));
 						return;
 					}
-					if (!Wire.pow.isResponseValid(profile.getName(), buf.readString())) {
+					if (Wire.password != null) recvPass = buf.readString();
+					if (!Wire.pow.isResponseValid(ip, buf.readString())) {
 						this.disconnect(new LiteralText("OCAIP: Invalid proof of work"));
+						return;
+					}
+				}
+				if (Wire.password != null){
+					if (!Wire.password.equals(recvPass == null ? buf.readString() : recvPass)) {
+						this.disconnect(new LiteralText("OCAIP: Wrong Password"));
 						return;
 					}
 				}
