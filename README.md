@@ -4,12 +4,14 @@ Allows connections to a server even when auth servers are unreachable.
 
 The goal is to just to add a bit of auth to offline-mode, while allowing normal online connections.
 
+
 ____________________________________________________
 
 ### Download
 Tested on Minecraft version: 1.18
 
 [Download latest version](https://github.com/SFort/MC-OCAIP/releases)
+
 ____________________________________________________
 
 ### Features: 
@@ -21,6 +23,7 @@ by creating `ocaip/sha1pow` and putting the amount of zero bits inside.
 The recommended value is: `24`  
 They can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`.
 
+
 ____________________________________________________
 
 ### How it works (in a nutshell):  
@@ -28,6 +31,7 @@ ____________________________________________________
 2. Client connects to server
 3. If the client hasn't connected before the server will prompt a registration password/proof of work
 4. The server will remember the public key and later logins will be seamless
+
 
 ____________________________________________________
 
@@ -47,6 +51,8 @@ public key you can reset the account by removing their name and the key undernea
 
   With this mod you can. To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
 I recommend you to use `assets/minecraft/textures/entity/steve.png` as a reference.
+
+
 ____________________________________________________
 
 **OCAIP**: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
