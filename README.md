@@ -1,4 +1,4 @@
-## Minecraft Server Offline Customization And Identification Protocol (OCAIP)
+## Offline Customization And Identification Protocol (OCAIP)
 
 Allows connections to a server even when auth servers are unreachable.
 
@@ -55,7 +55,7 @@ I recommend you to use `assets/minecraft/textures/entity/steve.png` as a referen
 
 ____________________________________________________
 
-**OCAIP**: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
+**OCAIP**: because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
 
 #### How it works in the real world:
 
