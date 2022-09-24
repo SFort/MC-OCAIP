@@ -50,7 +50,7 @@ public key you can reset the account by removing their name and the key undernea
 
 - My skin is the default one, can I change that?
 
-  With this mod you can. To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
+To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
 I recommend using `assets/minecraft/textures/entity/steve.png` as a reference.
 
 
