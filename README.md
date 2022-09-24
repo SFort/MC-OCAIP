@@ -12,7 +12,7 @@ Tested on Minecraft version: 1.18
 [Download latest version](https://github.com/SFort/MC-OCAIP/releases)
 ____________________________________________________
 
-# Options: 
+# Features: 
 - Offline logins can be restricted by a registration password  
 by creating `ocaip/password` and putting the password inside
 
