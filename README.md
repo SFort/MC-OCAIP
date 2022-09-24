@@ -22,7 +22,7 @@ by creating `ocaip/password` and putting the password inside
 by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
 The recommended value is: `24`  
 Higher values mean longer wait time  
-They can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`.
+They can also require multiple proofs of work, for example two 23 leadingZero ones by inserting `23*2`.
 
 
 ____________________________________________________
