@@ -12,11 +12,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.io.File;
-import java.nio.file.CopyOption;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -46,12 +44,12 @@ public class Tape {
 			if (skinFile.isFile()) {
 				String uuid = PlayerEntity.getOfflinePlayerUuid(MinecraftClient.getInstance().getSession().getUsername()).toString();
 				Path uuidPath = new File(Reel.skinDir+"/"+uuid+".png").toPath();
-				localSkin = Files.readAllBytes(uuidPath);
+				localSkin = Files.readAllBytes(skinFile.toPath());
 				if (localSkin.length > 409600) {
 					localSkin = null;
 					Reel.log.error("Specified skin is too large");
 				} else {
-					Files.copy(skinFile.toPath(), uuidPath, StandardCopyOption.REPLACE_EXISTING);
+					Files.write(uuidPath, localSkin);
 					MessageDigest md = MessageDigest.getInstance("MD5");
 					Reel.uuidToSkinHash.put(uuid, md.digest());
 					OfflineSkinResourcePack.hasTextureCache.put(uuid, true);

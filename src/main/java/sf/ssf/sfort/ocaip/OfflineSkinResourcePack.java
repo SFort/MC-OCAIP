@@ -1,7 +1,6 @@
 package sf.ssf.sfort.ocaip;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonObject;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.resource.metadata.ResourceMetadataReader;
@@ -17,13 +16,11 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class OfflineSkinResourcePack implements ResourcePack {
-	private static final JsonObject meta = new JsonObject();
 	@Nullable
 	@Override
 	public InputStream openRoot(String fileName) throws IOException {
@@ -46,17 +43,16 @@ public class OfflineSkinResourcePack implements ResourcePack {
 	public static boolean hasIs(String name) {
 		Boolean bl = hasTextureCache.get(name);
 		if (bl != null) return bl;
-		try {
-			getIS(name+".png");
+		if (new File(Reel.skinDir+"/"+name+".png").isFile()) {
 			hasTextureCache.put(name, true);
 			return true;
-		} catch (FileNotFoundException ignore) {}
+		}
 		hasTextureCache.put(name, false);
 		return false;
 	}
 
-	public static InputStream getIS(String name) throws FileNotFoundException {
-		return new FileInputStream(Reel.skinDir+"/"+name);
+	public static InputStream getIS(String name) throws IOException {
+		return Reel.stripAlpha(new FileInputStream(Reel.skinDir+"/"+name));
 	}
 
 	@Override
@@ -74,7 +70,7 @@ public class OfflineSkinResourcePack implements ResourcePack {
 	public boolean contains(ResourceType type, Identifier id) {
 		try {
 			getIS(id.getPath()+".png");
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			return false;
 		}
 		return true;
