@@ -52,7 +52,7 @@ ____________________________________________________
 OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
 ____________________________________________________
 
-# How it works in the real world:
+How it works in the real world:
 
 https://user-images.githubusercontent.com/1879846/192084366-2a80a7f2-d78e-4e72-83c3-d556ccbbc02b.mp4
 
