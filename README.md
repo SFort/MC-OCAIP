@@ -33,15 +33,18 @@ ____________________________________________________
 
 # Q&A:
 - Where's the private key stored?
+
 The private key is stored in `.minecraft/ocaip.key`  
 keeping a backup of the key is recommemded as losing it means  
 you won't be able to access that account and will have to contact an admin or create a new one.
 
 - How to reset user's account if they lost their public key (server sided)?
+
 Server hosts public keys are located in `ocaip/server_keys`. If a user lost their original
 public key you can reset the account by removing their name and the key underneath the name
 
 - My skin is the default one, can I change that?
+
 With this mod you can. To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
 I recommend you to use `assets/minecraft/textures/entity/steve.png` as a reference.
 ____________________________________________________
