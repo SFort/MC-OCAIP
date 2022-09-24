@@ -9,7 +9,8 @@ by creating `ocaip/sha1pow` and putting the amout of zero bits inside
 recommended value: `24`  
 they can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`
 
-to have a skin place a 64x64 pixel skin file into `.minecraft/ocaip_skin.png`
+to have a skin place a 64x64 pixel skin file into `.minecraft/ocaip_skin.png`  
+i recommend you use `assets/minecraft/textures/entity/steve.png` as a refrance
 
 OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
 
