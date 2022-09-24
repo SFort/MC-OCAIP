@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 @Environment(EnvType.SERVER)
 public class Wire {
-	public static final File conf = new File("ocaip/server_keys");
-	public static final File confPass = new File("ocaip/password");
-	public static final File confPow = new File("ocaip/sha1pow");
+	public static final File conf = new File(Reel.dir+"/server_keys");
+	public static final File confPass = new File(Reel.dir+"/password");
+	public static final File confPow = new File(Reel.dir+"/sha1pow");
 
 	public static Map<String, PublicKey> keys = new HashMap<>();
 	public static String password = null;

@@ -4,10 +4,14 @@
   "package": "sf.ssf.sfort.ocaip.mixin",
   "compatibilityLevel": "JAVA_11",
   "server": [
-    "NetServerLogin"
+    "NetServerLogin",
+    "NetServerSync"
   ],
   "client": [
-    "NetClientLogin"
+    "NetClientLogin",
+    "NetClientSync",
+    "ResourceManager",
+    "SkinHelper"
   ],
   "injectors": {
     "defaultRequire": 1

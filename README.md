@@ -11,5 +11,4 @@ they can also require multiple proofs of work, for example 2 23 leadingZero ones
 
 
 
-Originally called Offline Customization And Identification Protocol because the acronym kindof sounded like "Oh, Cape" (due to the migrator cape).  
-It's not really valid anymore since i didn't add cape customization, still keeping the acronym.
+OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounded like "Oh, Cape" (due to the migrator cape).  
