@@ -27,10 +27,10 @@ i recommend you use `assets/minecraft/textures/entity/steve.png` as a refrance
 ____________________________________________________
 
 # How it works (in a nutshell):  
-- 1. client creates a private key (this is kindof like a password but more secure)
-- 2. client connects to server
-- 3. if the client hasn't connected before the server will prompt a registration password/proof of work
-- 4. the server will remember the public key and later logins will be seamless
+1. client creates a private key (this is kindof like a password but more secure)
+2. client connects to server
+3. if the client hasn't connected before the server will prompt a registration password/proof of work
+4. the server will remember the public key and later logins will be seamless
 
 ____________________________________________________
 
