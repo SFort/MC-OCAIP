@@ -21,6 +21,7 @@ by creating `ocaip/password` and putting the password inside
 - Offline logins can be restricted by a registration proof of work  
 by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
 The recommended value is: `24`  
+Higher values mean longer wait time  
 They can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`.
 
 
@@ -50,7 +51,7 @@ public key you can reset the account by removing their name and the key undernea
 - My skin is the default one, can I change that?
 
   With this mod you can. To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
-I recommend you to use `assets/minecraft/textures/entity/steve.png` as a reference.
+I recommend using `assets/minecraft/textures/entity/steve.png` as a reference.
 
 
 ____________________________________________________
