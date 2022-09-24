@@ -49,8 +49,7 @@ public key you can reset the account by removing their name and the key undernea
 I recommend you to use `assets/minecraft/textures/entity/steve.png` as a reference.
 ____________________________________________________
 
-OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
-____________________________________________________
+**OCAIP**: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
 
 ### How it works in the real world:
 
