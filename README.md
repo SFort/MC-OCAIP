@@ -12,3 +12,8 @@ they can also require multiple proofs of work, for example 2 23 leadingZero ones
 to have a skin place a 64x64 pixel skin file into `.minecraft/ocaip_skin.png`
 
 OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
+
+
+
+https://user-images.githubusercontent.com/1879846/192084366-2a80a7f2-d78e-4e72-83c3-d556ccbbc02b.mp4
+
