@@ -46,11 +46,16 @@ public class Tape {
 			if (skinFile.isFile()) {
 				String uuid = PlayerEntity.getOfflinePlayerUuid(MinecraftClient.getInstance().getSession().getUsername()).toString();
 				Path uuidPath = new File(Reel.skinDir+"/"+uuid+".png").toPath();
-				Files.copy(skinFile.toPath(), uuidPath, StandardCopyOption.REPLACE_EXISTING);
-				MessageDigest md = MessageDigest.getInstance("MD5");
 				localSkin = Files.readAllBytes(uuidPath);
-				Reel.uuidToSkinHash.put(uuid, md.digest());
-				OfflineSkinResourcePack.hasTextureCache.put(uuid, true);
+				if (localSkin.length > 4090) {
+					localSkin = null;
+					Reel.log.error("Specified skin is too large");
+				} else {
+					Files.copy(skinFile.toPath(), uuidPath, StandardCopyOption.REPLACE_EXISTING);
+					MessageDigest md = MessageDigest.getInstance("MD5");
+					Reel.uuidToSkinHash.put(uuid, md.digest());
+					OfflineSkinResourcePack.hasTextureCache.put(uuid, true);
+				}
 			}
 		} catch (Exception ignore) {
 			Reel.log.error("Could not copy user skin file to skins");
