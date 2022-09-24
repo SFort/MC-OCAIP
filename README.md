@@ -11,4 +11,4 @@ they can also require multiple proofs of work, for example 2 23 leadingZero ones
 
 
 
-OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounded like "Oh, Cape" (due to the migrator cape).  
+OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
