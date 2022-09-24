@@ -47,7 +47,7 @@ public class Tape {
 				String uuid = PlayerEntity.getOfflinePlayerUuid(MinecraftClient.getInstance().getSession().getUsername()).toString();
 				Path uuidPath = new File(Reel.skinDir+"/"+uuid+".png").toPath();
 				localSkin = Files.readAllBytes(uuidPath);
-				if (localSkin.length > 4090) {
+				if (localSkin.length > 409600) {
 					localSkin = null;
 					Reel.log.error("Specified skin is too large");
 				} else {

@@ -41,7 +41,7 @@ public abstract class NetServerSync {
 			String path = packet.getChannel().getPath();
 			switch (path) {
 				case "local_skins": {
-					Map<String, byte[]> recv = buf.readMap(PacketByteBuf::readString, b -> b.readByteArray(4096));
+					Map<String, byte[]> recv = buf.readMap(PacketByteBuf::readString, PacketByteBuf::readByteArray);
 					String uuid = player.getUuid().toString();
 					{
 						byte[] playerHash = recv.get(uuid);
@@ -68,7 +68,7 @@ public abstract class NetServerSync {
 					break;
 				}
 				case "set_skin": {
-					byte[] skin = buf.readByteArray(4096);
+					byte[] skin = buf.readByteArray(409600);
 					String uuid = player.getUuid().toString();
 					if (skin != null) {
 						try {
