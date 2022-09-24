@@ -17,31 +17,33 @@ ____________________________________________________
 by creating `ocaip/password` and putting the password inside
 
 - Offline logins can be restricted by a registration proof of work  
-by creating `ocaip/sha1pow` and putting the amout of zero bits inside  
-recommended value: `24`  
-they can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`
-
-- to have a skin place a 64x64 pixel skin file into `.minecraft/ocaip_skin.png`  
-i recommend you use `assets/minecraft/textures/entity/steve.png` as a refrance
+by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
+The recommended value is: `24`  
+They can also require multiple proofs of work, for example 2 23 leadingZero ones by inserting `23*2`.
 
 ____________________________________________________
 
 # How it works (in a nutshell):  
-1. client creates a private key (this is kindof like a password but more secure)
-2. client connects to server
-3. if the client hasn't connected before the server will prompt a registration password/proof of work
-4. the server will remember the public key and later logins will be seamless
+1. Client creates a private key (this is kindof like a password but more secure)
+2. Client connects to server
+3. If the client hasn't connected before the server will prompt a registration password/proof of work
+4. The server will remember the public key and later logins will be seamless
 
 ____________________________________________________
 
 # Q&A:
 - Where's the private key stored?
-the private key is stored in `.minecraft/ocaip.key`  
+The private key is stored in `.minecraft/ocaip.key`  
 keeping a backup of the key is recommemded as losing it means  
 you won't be able to access that account and will have to contact an admin or create a new one.
 
-for server hosts public keys are located in `ocaip/server_keys` if a user has lost their
+- How to reset user's account if they lost their public key (server sided)?
+Server hosts public keys are located in `ocaip/server_keys`. If a user lost their original
 public key you can reset the account by removing their name and the key underneath the name
+
+- My skin is the default one, can I change that?
+With this mod you can. To have a skin, place your 64x64 pixel skin file into `.minecraft/ocaip_skin.png`.  
+I recommend you to use `assets/minecraft/textures/entity/steve.png` as a reference.
 ____________________________________________________
 
 OCAIP: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
