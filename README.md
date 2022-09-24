@@ -1,4 +1,4 @@
-# Minecraft Server Offline Customization And Identification Protocol (OCAIP)
+## Minecraft Server Offline Customization And Identification Protocol (OCAIP)
 
 Allows connections to a server even when auth servers are unreachable.
 
@@ -6,13 +6,13 @@ The goal is to just to add a bit of auth to offline-mode, while allowing normal 
 
 ____________________________________________________
 
-## Download
+### Download
 Tested on Minecraft version: 1.18
 
 [Download latest version](https://github.com/SFort/MC-OCAIP/releases)
 ____________________________________________________
 
-## Features: 
+### Features: 
 - Offline logins can be restricted by a registration password  
 by creating `ocaip/password` and putting the password inside
 
@@ -23,7 +23,7 @@ They can also require multiple proofs of work, for example 2 23 leadingZero ones
 
 ____________________________________________________
 
-## How it works (in a nutshell):  
+### How it works (in a nutshell):  
 1. Client creates a private key (this is kindof like a password but more secure)
 2. Client connects to server
 3. If the client hasn't connected before the server will prompt a registration password/proof of work
@@ -31,7 +31,7 @@ ____________________________________________________
 
 ____________________________________________________
 
-## Q&A:
+### Q&A:
 - Where's the private key stored?
 
   The private key is stored in `.minecraft/ocaip.key`  
@@ -51,7 +51,7 @@ ____________________________________________________
 
 **OCAIP**: Offline Customization And Identification Protocol because the acronym kindof sounds like "Oh, Cape" (due to the migrator cape).  
 
-### How it works in the real world:
+#### How it works in the real world:
 
 https://user-images.githubusercontent.com/1879846/192084366-2a80a7f2-d78e-4e72-83c3-d556ccbbc02b.mp4
 
