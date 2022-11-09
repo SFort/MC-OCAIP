@@ -8,9 +8,9 @@ The goal is to just to add a bit of auth to offline-mode, while allowing normal 
 ____________________________________________________
 
 ### Download
-Tested on Minecraft version: 1.18
 
-[Download latest version](https://github.com/SFort/MC-OCAIP/releases)
+1.19.2 - [1.2.4](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.4)  
+1.18.2 - [1.2.3](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.3)
 
 ____________________________________________________
 
