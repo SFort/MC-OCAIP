@@ -48,7 +48,7 @@ public class Wire {
 		}
 		try {
 			List<String> ln = Files.readAllLines(conf.toPath());
-			for (int i = 1; i <= ln.size() / 2; i += 2) {
+			for (int i = 1; i <= ln.size(); i += 2) {
 				String s = ln.get(i);
 				keys.put(ln.get(i - 1), s.isBlank() ? null : new EdDSAPublicKey(new X509EncodedKeySpec(Base64.getDecoder().decode(s))));
 			}
