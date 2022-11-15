@@ -9,8 +9,8 @@ ____________________________________________________
 
 ### Download
 
-1.19.2 - [1.2.4](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.4)  
-1.18.2 - [1.2.3](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.3)
+1.19.2 - [1.2.5](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.5)  
+1.18.2 - [1.2.5-1.18.2](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.5)
 
 ____________________________________________________
 
