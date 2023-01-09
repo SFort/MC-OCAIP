@@ -9,7 +9,7 @@ import net.i2p.crypto.eddsa.KeyPairGenerator;
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
+import net.minecraft.util.Uuids;
 
 import java.io.File;
 import java.nio.file.FileSystemException;
@@ -42,7 +42,7 @@ public class Tape {
 		} catch (Exception ignore) { }
 		try {
 			if (skinFile.isFile()) {
-				String uuid = DynamicSerializableUuid.getOfflinePlayerUuid(MinecraftClient.getInstance().getSession().getUsername()).toString();
+				String uuid = Uuids.getOfflinePlayerUuid(MinecraftClient.getInstance().getSession().getUsername()).toString();
 				Path uuidPath = new File(Reel.skinDir+"/"+uuid+".png").toPath();
 				localSkin = Files.readAllBytes(skinFile.toPath());
 				if (localSkin.length > 409600) {

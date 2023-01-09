@@ -53,7 +53,8 @@ public class AuthScreen extends Screen {
 			pass.visible = false;
 			pass.active = false;
 		}
-		button = new ButtonWidget(width/2-62, height/2+10, 124, 20, Text.of("Register"), a -> {
+
+		button = ButtonWidget.builder(Text.of("Register"), a -> {
 			ConnectScreen.connect(parent, client, address, null);
 			String powRez = null;
 			try {
@@ -62,7 +63,7 @@ public class AuthScreen extends Screen {
 				Reel.log.error("Error getting pow", e);
 			}
 			Tape.auth = new AuthObject(pass.getText(), powRez);
-		});
+		}).position(width/2-62, height/2+10).size(124, 20).build();
 		if (this.powCompute != null){
 			button.setMessage(Text.of("Computing requirements"));
 			button.active = false;

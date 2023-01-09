@@ -6,8 +6,6 @@ import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.network.encryption.SignatureVerifier;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
@@ -20,7 +18,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import sf.ssf.sfort.ocaip.Reel;
 import sf.ssf.sfort.ocaip.Wire;
 
@@ -29,7 +26,6 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
-import java.util.UUID;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class NetServerLogin {
@@ -84,11 +80,6 @@ public abstract class NetServerLogin {
 		} else try {
 			Wire.addAndWrite(profile.getName(), null);
 		} catch (Exception ignore) {}
-	}
-
-	@Inject(at = @At("HEAD"), method="getVerifiedPublicKey(Lnet/minecraft/network/encryption/PlayerPublicKey$PublicKeyData;Ljava/util/UUID;Lnet/minecraft/network/encryption/SignatureVerifier;Z)Lnet/minecraft/network/encryption/PlayerPublicKey;", cancellable=true)
-	private static void ocaip$bypassKeyPair(PlayerPublicKey.PublicKeyData publicKeyData, UUID playerUuid, SignatureVerifier servicesSignatureVerifier, boolean shouldThrowOnMissingKey, CallbackInfoReturnable<PlayerPublicKey> cir) {
-		if (publicKeyData == null) cir.setReturnValue(null);
 	}
 
 	@Inject(at = @At("HEAD"), method="onQueryResponse(Lnet/minecraft/network/packet/c2s/login/LoginQueryResponseC2SPacket;)V", cancellable=true)
