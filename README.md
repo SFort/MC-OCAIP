@@ -19,7 +19,8 @@ ____________________________________________________
 by creating `ocaip/password` and putting the password inside
 
 - Offline logins can be restricted by a registration proof of work  
-by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
+by creating `ocaip/sha1pow` and putting the amount of zero bits inside.
+or creating `ocaip/sha512pow` (since 1.2.7)
 The recommended value is: `24`  
 Higher values mean longer wait time  
 They can also require multiple proofs of work, for example two 23 leadingZero ones by inserting `23*2`.
