@@ -9,6 +9,7 @@ ____________________________________________________
 
 ### Download
 
+1.19.3 - [1.3.0](https://github.com/SFort/MC-OCAIP/releases/tag/r1.3.0)  
 1.19.2 - [1.2.5](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.5)  
 1.18.2 - [1.2.5-1.18.2](https://github.com/SFort/MC-OCAIP/releases/tag/r1.2.5)
 
@@ -20,8 +21,7 @@ by creating `ocaip/password` and putting the password inside
 
 - Offline logins can be restricted by a registration proof of work  
 by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
-or creating `ocaip/sha512pow` (since 1.2.7)  
-The recommended value is: `24`  
+or `ocaip/argon2pow`, `ocaip/sha512pow` (since 1.3.0)  
 Higher values mean longer wait time  
 They can also require multiple proofs of work, for example two 23 leadingZero ones by inserting `23*2`.
 
