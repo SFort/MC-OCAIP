@@ -19,4 +19,10 @@ public class SkinHelper {
 			cir.setReturnValue(new Identifier("ocaip_skin", uu));
 		}
 	}
+	@Inject(method="getModel(Ljava/util/UUID;)Ljava/lang/String;", at=@At("HEAD"), cancellable=true)
+	private static void ocaip$offlineModel(UUID uuid, CallbackInfoReturnable<String> cir) {
+		if (Tape.hasOfflineSkin(uuid.toString())) {
+			cir.setReturnValue("default");
+		}
+	}
 }
