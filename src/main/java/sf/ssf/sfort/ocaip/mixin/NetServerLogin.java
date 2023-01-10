@@ -54,14 +54,20 @@ public abstract class NetServerLogin {
 		ocaip$random.nextBytes(bytes);
 		buf.writeByteArray(bytes);
 		String name = packet.name();
-		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null) ? 41809951 : 41809952;
+		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null && Wire.pow512 == null) ? 41809951 : 41809952;
 		if (requestCode == 41809952) {
-			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10));
+			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10) | (Wire.pow512 == null ? 0 : 0b100));
 			if (Wire.pow != null) {
 				String ip = connection.getAddress().toString();
 				int i = ip.lastIndexOf(':');
 				if (i!=-1) ip = ip.substring(0, i);
 				buf.writeString(Wire.pow.genPrompt(name+ip, ocaip$random));
+			}
+			if (Wire.pow512 != null) {
+				String ip = connection.getAddress().toString();
+				int i = ip.lastIndexOf(':');
+				if (i!=-1) ip = ip.substring(0, i);
+				buf.writeString(Wire.pow512.genPrompt(name+ip, ocaip$random));
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
@@ -122,24 +128,37 @@ public abstract class NetServerLogin {
 				this.disconnect(Text.literal("OCAIP: Key already exists for this user, change username or contact admin"));
 				return;
 			} else {
-				String recvPass = null;
+				String recvPass = Wire.password == null ? null : buf.readString();
 				if (Wire.pow != null) {
 					String ip = connection.getAddress().toString();
 					int i = ip.lastIndexOf(':');
 					if (i!=-1) ip = ip.substring(0, i);
 					ip = profile.getName() + ip;
 					if (!Wire.pow.sessionQueries.containsKey(ip)) {
-						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting proof of work"));
+						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting sha1 proof of work"));
 						return;
 					}
-					if (Wire.password != null) recvPass = buf.readString();
 					if (!Wire.pow.isResponseValid(ip, buf.readString())) {
-						this.disconnect(Text.literal("OCAIP: Invalid proof of work"));
+						this.disconnect(Text.literal("OCAIP: Invalid sha1 proof of work"));
+						return;
+					}
+				}
+				if (Wire.pow512 != null) {
+					String ip = connection.getAddress().toString();
+					int i = ip.lastIndexOf(':');
+					if (i!=-1) ip = ip.substring(0, i);
+					ip = profile.getName() + ip;
+					if (!Wire.pow512.sessionQueries.containsKey(ip)) {
+						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting sha512 proof of work"));
+						return;
+					}
+					if (!Wire.pow512.isResponseValid(ip, buf.readString())) {
+						this.disconnect(Text.literal("OCAIP: Invalid sha512 proof of work"));
 						return;
 					}
 				}
 				if (Wire.password != null){
-					if (!Wire.password.equals(recvPass == null ? buf.readString() : recvPass)) {
+					if (!Wire.password.equals(recvPass)) {
 						this.disconnect(Text.literal("OCAIP: Wrong Password"));
 						return;
 					}

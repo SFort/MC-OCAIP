@@ -12,29 +12,34 @@ import net.minecraft.text.Text;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AuthScreen extends Screen {
 
+	final AtomicInteger processCount;
 	final Screen parent;
 	final ServerAddress address;
 	final boolean reqPass;
 	final Future<String> powCompute;
+	final Future<String> pow512Compute;
 	TextFieldWidget pass;
 	ButtonWidget button;
 
 	String text = "";
 
-	public AuthScreen(InetSocketAddress address, Screen parent, boolean requirePass, String powPrompt) {
+	public AuthScreen(InetSocketAddress address, Screen parent, boolean requirePass, String powPrompt, String pow512Prompt) {
 		super(Text.of("OCAIP Password Screen"));
 		this.parent = parent;
 		this.address = new ServerAddress(address.getHostName(), address.getPort());
 		this.reqPass = requirePass;
-		this.powCompute = powPrompt == null ? null : POW.computeSolutionAsync(powPrompt, ()->{
+		this.processCount = new AtomicInteger((powPrompt != null ? 1 : 0) + (pow512Prompt != null ? 1 : 0));
+		this.powCompute = powPrompt == null ? null : POW.computeSolutionAsync(powPrompt, this::decrementProcessCount, () -> {
 			if (this.button != null){
-				button.setMessage(Text.of("Register"));
-				this.button.active = true;
+				button.setMessage(Text.of("Failed"));
+				text = "Failed to compute requirements, check logs for full error";
 			}
-		}, () -> {
+		});
+		this.pow512Compute = pow512Prompt == null ? null : POW512.computeSolutionAsync(pow512Prompt, this::decrementProcessCount, () -> {
 			if (this.button != null){
 				button.setMessage(Text.of("Failed"));
 				text = "Failed to compute requirements, check logs for full error";
@@ -42,7 +47,12 @@ public class AuthScreen extends Screen {
 		});
 		this.init(MinecraftClient.getInstance(), parent.width, parent.height);
 	}
-
+	public void decrementProcessCount() {
+		if (this.button != null & processCount.decrementAndGet() < 1){
+			button.setMessage(Text.of("Register"));
+			this.button.active = true;
+		}
+	}
 	@Override
 	public void init() {
 		super.init();
@@ -62,9 +72,15 @@ public class AuthScreen extends Screen {
 			} catch (InterruptedException | ExecutionException e) {
 				Reel.log.error("Error getting pow", e);
 			}
-			Tape.auth = new AuthObject(pass.getText(), powRez);
+			String pow512Rez = null;
+			try {
+				if (pow512Compute != null) pow512Rez = pow512Compute.get();
+			} catch (InterruptedException | ExecutionException e) {
+				Reel.log.error("Error getting pow", e);
+			}
+			Tape.auth = new AuthObject(pass.getText(), powRez, pow512Rez);
 		}).position(width/2-62, height/2+10).size(124, 20).build();
-		if (this.powCompute != null){
+		if (processCount.getAcquire() > 0){
 			button.setMessage(Text.of("Computing requirements"));
 			button.active = false;
 		}

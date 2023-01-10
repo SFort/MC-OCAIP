@@ -67,8 +67,11 @@ public abstract class NetClientLogin {
 			}
 			PacketByteBuf tbuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion).writeByteArray(Tape.key.getPublic().getEncoded()).writeByteArray(bytes);
 			if (pid == 41809952) {
+				// 0 - password
+				// 1 - sha1 pow
+				// 2 - sha512 pow
 				int authTags = buf.readVarInt();
-				if (authTags <= 0 || authTags > 0b11) {
+				if (authTags <= 0 || authTags > 0b111) {
 					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested unknown authentication type")));
 					return;
 				}
@@ -79,7 +82,8 @@ public abstract class NetClientLogin {
 								(InetSocketAddress)this.connection.getAddress(),
 								this.parentScreen,
 								(authTags & 0b1) != 0,
-								(authTags & 0b10) != 0 ? buf.readString() : null
+								(authTags & 0b10) != 0 ? buf.readString() : null,
+								(authTags & 0b100) != 0 ? buf.readString() : null
 						));
 					} else {
 						client.setScreen(this.parentScreen);
@@ -99,6 +103,13 @@ public abstract class NetClientLogin {
 						return;
 					}
 					tbuf.writeString(Tape.auth.pow);
+				}
+				if ((authTags & 0b100) != 0) {
+					if (Tape.auth.pow512 == null) {
+						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No sha512 pow was generated when it's required")));
+						return;
+					}
+					tbuf.writeString(Tape.auth.pow512);
 				}
 			}
 			Tape.auth = null;

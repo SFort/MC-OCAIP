@@ -19,11 +19,13 @@ public class Wire {
 	public static final File conf = new File(Reel.dir+"/server_keys");
 	public static final File confPass = new File(Reel.dir+"/password");
 	public static final File confPow = new File(Reel.dir+"/sha1pow");
+	public static final File confPow512 = new File(Reel.dir+"/sha512pow");
 
 	public static Map<String, PublicKey> keys = new HashMap<>();
 	public static String password = null;
 
 	public static POW pow = null;
+	public static POW512 pow512 = null;
 
 	public static void addAndWrite(String name, PublicKey key) throws IOException {
 		if (!keys.containsKey(name)) {
@@ -73,6 +75,24 @@ public class Wire {
 				}
 				if (zeros > 0) {
 					Wire.pow = new POW(Math.min(100, zeros), Math.max(1, count));
+				}
+			}
+		} catch (Exception ignore) {
+		}
+		try {
+			String s = Files.readString(confPow512.toPath()).trim();
+			if (!s.isBlank()) {
+				int i = s.indexOf('*');
+				int count = 1;
+				int zeros = 0;
+				if (i != -1) {
+					count = Integer.parseInt(s.substring(i+1));
+					zeros = Integer.parseInt(s.substring(0, i));
+				} else {
+					zeros = Integer.parseInt(s);
+				}
+				if (zeros > 0) {
+					Wire.pow512 = new POW512(Math.min(200, zeros), Math.max(1, count));
 				}
 			}
 		} catch (Exception ignore) {
