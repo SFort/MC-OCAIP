@@ -54,9 +54,9 @@ public abstract class NetServerLogin {
 		ocaip$random.nextBytes(bytes);
 		buf.writeByteArray(bytes);
 		String name = packet.name();
-		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null && Wire.pow512 == null) ? 41809951 : 41809952;
+		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null && Wire.pow512 == null && Wire.powArgon2 == null) ? 41809951 : 41809952;
 		if (requestCode == 41809952) {
-			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10) | (Wire.pow512 == null ? 0 : 0b100));
+			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10) | (Wire.pow512 == null ? 0 : 0b100)| (Wire.powArgon2 == null ? 0 : 0b1000));
 			if (Wire.pow != null) {
 				String ip = connection.getAddress().toString();
 				int i = ip.lastIndexOf(':');
@@ -68,6 +68,12 @@ public abstract class NetServerLogin {
 				int i = ip.lastIndexOf(':');
 				if (i!=-1) ip = ip.substring(0, i);
 				buf.writeString(Wire.pow512.genPrompt(name+ip, ocaip$random));
+			}
+			if (Wire.powArgon2 != null) {
+				String ip = connection.getAddress().toString();
+				int i = ip.lastIndexOf(':');
+				if (i!=-1) ip = ip.substring(0, i);
+				buf.writeString(Wire.powArgon2.genPrompt(name+ip, ocaip$random));
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
@@ -154,6 +160,20 @@ public abstract class NetServerLogin {
 					}
 					if (!Wire.pow512.isResponseValid(ip, buf.readString())) {
 						this.disconnect(Text.literal("OCAIP: Invalid sha512 proof of work"));
+						return;
+					}
+				}
+				if (Wire.powArgon2 != null) {
+					String ip = connection.getAddress().toString();
+					int i = ip.lastIndexOf(':');
+					if (i!=-1) ip = ip.substring(0, i);
+					ip = profile.getName() + ip;
+					if (!Wire.powArgon2.sessionQueries.containsKey(ip)) {
+						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting argon2 proof of work"));
+						return;
+					}
+					if (!Wire.powArgon2.isResponseValid(ip, buf.readString())) {
+						this.disconnect(Text.literal("OCAIP: Invalid argon2 proof of work"));
 						return;
 					}
 				}

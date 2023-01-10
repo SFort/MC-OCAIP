@@ -6,20 +6,23 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class POW512 {
 
-	public static String computeSolution(String recvPow) {
+	public static String computeSolution(String recvPow, AtomicBoolean canceled) {
 		int count = Integer.valueOf(recvPow.substring(0, recvPow.indexOf(',')), 36);
 		byte[] num = new byte[4];
 		new Random().nextBytes(num);
 		Base64.Encoder encoder = Base64.getEncoder();
 		while (leadingZeros(recvPow + "," + encoder.encodeToString(num)) < count) {
+			if (canceled.get()) return null;
 			num = POW.increment(num);
 		}
 		return recvPow+","+encoder.encodeToString(num);
@@ -34,10 +37,10 @@ public class POW512 {
 		}
 		return 0;
 	}
-	public static Future<String> computeSolutionAsync(String recvPow, Runnable onDone, Runnable onFail) {
+	public static Future<String> computeSolutionAsync(String recvPow, Runnable onDone, Runnable onFail, AtomicBoolean canceled) {
 		LinkedList<CompletableFuture<String>> futures = new LinkedList<>();
 		for (String s : recvPow.split(";")) {
-			futures.add(CompletableFuture.supplyAsync(()->computeSolution(s)));
+			futures.add(CompletableFuture.supplyAsync(()->computeSolution(s, canceled)));
 		}
 		return CompletableFuture.supplyAsync(() -> {
 			StringBuilder sb = new StringBuilder();
@@ -45,6 +48,7 @@ public class POW512 {
 				CompletableFuture<String> f = futures.poll();
 				if (f!=null) sb.append(f.get());
 				for (CompletableFuture<String> future : futures) {
+					if (canceled.get()) return null;
 					sb.append(';');
 					sb.append(future.get());
 				}
@@ -53,6 +57,7 @@ public class POW512 {
 				onFail.run();
 				return null;
 			}
+			if (canceled.get()) return null;
 			onDone.run();
 			return sb.toString();
 		});

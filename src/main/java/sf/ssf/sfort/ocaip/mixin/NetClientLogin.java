@@ -70,8 +70,9 @@ public abstract class NetClientLogin {
 				// 0 - password
 				// 1 - sha1 pow
 				// 2 - sha512 pow
+				// 3 - argon2 pow
 				int authTags = buf.readVarInt();
-				if (authTags <= 0 || authTags > 0b111) {
+				if (authTags <= 0 || authTags > 0b1111) {
 					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested unknown authentication type")));
 					return;
 				}
@@ -83,7 +84,8 @@ public abstract class NetClientLogin {
 								this.parentScreen,
 								(authTags & 0b1) != 0,
 								(authTags & 0b10) != 0 ? buf.readString() : null,
-								(authTags & 0b100) != 0 ? buf.readString() : null
+								(authTags & 0b100) != 0 ? buf.readString() : null,
+								(authTags & 0b1000) != 0 ? buf.readString() : null
 						));
 					} else {
 						client.setScreen(this.parentScreen);
@@ -110,6 +112,13 @@ public abstract class NetClientLogin {
 						return;
 					}
 					tbuf.writeString(Tape.auth.pow512);
+				}
+				if ((authTags & 0b1000) != 0) {
+					if (Tape.auth.powArgon2 == null) {
+						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No argon2 pow was generated when it's required")));
+						return;
+					}
+					tbuf.writeString(Tape.auth.powArgon2);
 				}
 			}
 			Tape.auth = null;

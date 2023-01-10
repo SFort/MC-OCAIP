@@ -17,15 +17,13 @@ import java.util.Map;
 @Environment(EnvType.SERVER)
 public class Wire {
 	public static final File conf = new File(Reel.dir+"/server_keys");
-	public static final File confPass = new File(Reel.dir+"/password");
-	public static final File confPow = new File(Reel.dir+"/sha1pow");
-	public static final File confPow512 = new File(Reel.dir+"/sha512pow");
 
 	public static Map<String, PublicKey> keys = new HashMap<>();
 	public static String password = null;
 
 	public static POW pow = null;
 	public static POW512 pow512 = null;
+	public static POWArgon2 powArgon2 = null;
 
 	public static void addAndWrite(String name, PublicKey key) throws IOException {
 		if (!keys.containsKey(name)) {
@@ -42,6 +40,10 @@ public class Wire {
 	}
 
 	static {
+		File confPass = new File(Reel.dir+"/password");
+		File confPow = new File(Reel.dir+"/sha1pow");
+		File confPow512 = new File(Reel.dir+"/sha512pow");
+		File confPowArgon = new File(Reel.dir+"/argon2pow");
 		Reel.createDir();
 		try {
 			String s = Files.readString(confPass.toPath()).trim();
@@ -93,6 +95,24 @@ public class Wire {
 				}
 				if (zeros > 0) {
 					Wire.pow512 = new POW512(Math.min(200, zeros), Math.max(1, count));
+				}
+			}
+		} catch (Exception ignore) {
+		}
+		try {
+			String s = Files.readString(confPowArgon.toPath()).trim();
+			if (!s.isBlank()) {
+				int i = s.indexOf('*');
+				int count = 1;
+				int zeros = 0;
+				if (i != -1) {
+					count = Integer.parseInt(s.substring(i+1));
+					zeros = Integer.parseInt(s.substring(0, i));
+				} else {
+					zeros = Integer.parseInt(s);
+				}
+				if (zeros > 0) {
+					Wire.powArgon2 = new POWArgon2(Math.min(200, zeros), Math.max(1, count));
 				}
 			}
 		} catch (Exception ignore) {
