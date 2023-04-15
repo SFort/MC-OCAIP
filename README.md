@@ -17,14 +17,8 @@ ____________________________________________________
 
 ### Features: 
 - Offline logins can be restricted by a registration password  
-by creating `ocaip/password` and putting the password inside
 
 - Offline logins can be restricted by a registration proof of work  
-by creating `ocaip/sha1pow` and putting the amount of zero bits inside.  
-or `ocaip/argon2pow`, `ocaip/sha512pow` (since 1.3.0)  
-Higher values mean longer wait time  
-They can also require multiple proofs of work, for example two 23 leadingZero ones by inserting `23*2`.  
-Requireing too many proofs of work could cause issues, haven't tested.  
 
 ____________________________________________________
 

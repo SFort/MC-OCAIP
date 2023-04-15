@@ -37,7 +37,7 @@ public abstract class NetClientLogin {
 	public void ignoreYggdrasilErr(CallbackInfoReturnable<Text> cir) {
 		if (ocaip$recivedRequest) {
 			if (cir.getReturnValue() == null){
-				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion)));
+				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion)));
 			} else {
 				cir.setReturnValue(null);
 			}
@@ -65,14 +65,24 @@ public abstract class NetClientLogin {
 			} catch (Exception ignore){
 				return;
 			}
-			PacketByteBuf tbuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocalVersion).writeByteArray(Tape.key.getPublic().getEncoded()).writeByteArray(bytes);
+			PacketByteBuf tbuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion).writeByteArray(Tape.key.getPublic().getEncoded()).writeByteArray(bytes);
 			if (pid == 41809952) {
 				// 0 - password
 				// 1 - sha1 pow
-				// 2 - sha512 pow
-				// 3 - argon2 pow
+
+				//In version 2 ONLY
+					// 2 - sha512 pow
+					// 3 - argon2 pow
 				int authTags = buf.readVarInt();
-				if (authTags <= 0 || authTags > 0b1111) {
+				if (version == 2 && (authTags & 0b1100) != 0) {
+					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested removed authentication type")));
+					return;
+				}
+				if (authTags <= 0 || authTags > 0b11) {
+					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested unknown authentication type")));
+					return;
+				}
+				if (authTags <= 0 || authTags > 0b11) {
 					this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server requested unknown authentication type")));
 					return;
 				}
@@ -83,9 +93,7 @@ public abstract class NetClientLogin {
 								(InetSocketAddress)this.connection.getAddress(),
 								this.parentScreen,
 								(authTags & 0b1) != 0,
-								(authTags & 0b10) != 0 ? buf.readString() : null,
-								(authTags & 0b100) != 0 ? buf.readString() : null,
-								(authTags & 0b1000) != 0 ? buf.readString() : null
+								(authTags & 0b10) != 0 ? buf.readString() : null
 						));
 					} else {
 						client.setScreen(this.parentScreen);
@@ -105,20 +113,6 @@ public abstract class NetClientLogin {
 						return;
 					}
 					tbuf.writeString(Tape.auth.pow);
-				}
-				if ((authTags & 0b100) != 0) {
-					if (Tape.auth.pow512 == null) {
-						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No sha512 pow was generated when it's required")));
-						return;
-					}
-					tbuf.writeString(Tape.auth.pow512);
-				}
-				if ((authTags & 0b1000) != 0) {
-					if (Tape.auth.powArgon2 == null) {
-						this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("No argon2 pow was generated when it's required")));
-						return;
-					}
-					tbuf.writeString(Tape.auth.powArgon2);
 				}
 			}
 			Tape.auth = null;

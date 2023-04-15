@@ -49,31 +49,19 @@ public abstract class NetServerLogin {
 	@Inject(at=@At("HEAD"), method="onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V")
 	public void submitAuthRequest(LoginHelloC2SPacket packet, CallbackInfo ci) {
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		buf.writeVarInt(Reel.protocalVersion);
+		buf.writeVarInt(Reel.protocolVersion);
 		byte[] bytes = new byte[256];
 		ocaip$random.nextBytes(bytes);
 		buf.writeByteArray(bytes);
 		String name = packet.name();
-		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null && Wire.pow512 == null && Wire.powArgon2 == null) ? 41809951 : 41809952;
+		int requestCode = Wire.keys.containsKey(name) || (Wire.password == null && Wire.pow == null) ? 41809951 : 41809952;
 		if (requestCode == 41809952) {
-			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10) | (Wire.pow512 == null ? 0 : 0b100)| (Wire.powArgon2 == null ? 0 : 0b1000));
+			buf.writeVarInt((Wire.password == null ? 0 : 0b1) | (Wire.pow == null ? 0 : 0b10));
 			if (Wire.pow != null) {
 				String ip = connection.getAddress().toString();
 				int i = ip.lastIndexOf(':');
 				if (i!=-1) ip = ip.substring(0, i);
 				buf.writeString(Wire.pow.genPrompt(name+ip, ocaip$random));
-			}
-			if (Wire.pow512 != null) {
-				String ip = connection.getAddress().toString();
-				int i = ip.lastIndexOf(':');
-				if (i!=-1) ip = ip.substring(0, i);
-				buf.writeString(Wire.pow512.genPrompt(name+ip, ocaip$random));
-			}
-			if (Wire.powArgon2 != null) {
-				String ip = connection.getAddress().toString();
-				int i = ip.lastIndexOf(':');
-				if (i!=-1) ip = ip.substring(0, i);
-				buf.writeString(Wire.powArgon2.genPrompt(name+ip, ocaip$random));
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
@@ -90,6 +78,11 @@ public abstract class NetServerLogin {
 			this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 			ci.cancel();
 		} else try {
+			if (Wire.requireOCAIP) {
+				disconnect(Text.literal("OCAIP: Server requires OCAIP auth"));
+				ci.cancel();
+				return;
+			}
 			Wire.addAndWrite(profile.getName(), null);
 		} catch (Exception ignore) {}
 	}
@@ -101,7 +94,8 @@ public abstract class NetServerLogin {
             ci.cancel();
             PacketByteBuf buf = packet.getResponse();
             if (buf == null) return;
-            ocaip$shouldBypass = false;
+			if (Wire.requireOCAIP) return;
+			ocaip$shouldBypass = false;
         } else if (pid == 41809951 || pid == 41809952) {
 			ci.cancel();
 			PacketByteBuf buf = packet.getResponse();
@@ -146,34 +140,6 @@ public abstract class NetServerLogin {
 					}
 					if (!Wire.pow.isResponseValid(ip, buf.readString())) {
 						this.disconnect(Text.literal("OCAIP: Invalid sha1 proof of work"));
-						return;
-					}
-				}
-				if (Wire.pow512 != null) {
-					String ip = connection.getAddress().toString();
-					int i = ip.lastIndexOf(':');
-					if (i!=-1) ip = ip.substring(0, i);
-					ip = profile.getName() + ip;
-					if (!Wire.pow512.sessionQueries.containsKey(ip)) {
-						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting sha512 proof of work"));
-						return;
-					}
-					if (!Wire.pow512.isResponseValid(ip, buf.readString())) {
-						this.disconnect(Text.literal("OCAIP: Invalid sha512 proof of work"));
-						return;
-					}
-				}
-				if (Wire.powArgon2 != null) {
-					String ip = connection.getAddress().toString();
-					int i = ip.lastIndexOf(':');
-					if (i!=-1) ip = ip.substring(0, i);
-					ip = profile.getName() + ip;
-					if (!Wire.powArgon2.sessionQueries.containsKey(ip)) {
-						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting argon2 proof of work"));
-						return;
-					}
-					if (!Wire.powArgon2.isResponseValid(ip, buf.readString())) {
-						this.disconnect(Text.literal("OCAIP: Invalid argon2 proof of work"));
 						return;
 					}
 				}

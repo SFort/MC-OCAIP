@@ -10,8 +10,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.net.InetSocketAddress;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,43 +23,21 @@ public class AuthScreen extends Screen {
 	final ServerAddress address;
 	final boolean reqPass;
 	final Future<String> powCompute;
-	final Future<String> pow512Compute;
-	final Future<String> powArgon2Compute;
 	TextFieldWidget pass;
 	ButtonWidget button;
 
 	String text = "";
 
-	public AuthScreen(InetSocketAddress address, Screen parent, boolean requirePass, String powPrompt, String pow512Prompt, String powArgon2Prompt) {
+	public AuthScreen(InetSocketAddress address, Screen parent, boolean requirePass, String powPrompt) {
 		super(Text.of("OCAIP Password Screen"));
 		this.parent = parent;
 		this.address = new ServerAddress(address.getHostName(), address.getPort());
 		this.reqPass = requirePass;
-		this.processCount = new AtomicInteger((powPrompt != null ? 1 : 0) + (pow512Prompt != null ? 1 : 0) + (powArgon2Prompt != null ? 1 : 0));
+		this.processCount = new AtomicInteger((powPrompt != null ? 1 : 0));
 		if (powPrompt == null) {
 			this.powCompute = null;
 		} else {
 			this.powCompute = POW.computeSolutionAsync(powPrompt, this::decrementProcessCount, () -> {
-				if (this.button != null){
-					button.setMessage(Text.of("Failed"));
-					text = "Failed to compute requirements, check logs for full error";
-				}
-			}, canceled);
-		}
-		if (pow512Prompt == null) {
-			this.pow512Compute = null;
-		} else {
-			this.pow512Compute = POW512.computeSolutionAsync(pow512Prompt, this::decrementProcessCount, () -> {
-				if (this.button != null){
-					button.setMessage(Text.of("Failed"));
-					text = "Failed to compute requirements, check logs for full error";
-				}
-			}, canceled);
-		}
-		if (powArgon2Prompt == null) {
-			this.powArgon2Compute = null;
-		} else {
-			this.powArgon2Compute = POWArgon2.computeSolutionAsync(powArgon2Prompt, this::decrementProcessCount, () -> {
 				if (this.button != null){
 					button.setMessage(Text.of("Failed"));
 					text = "Failed to compute requirements, check logs for full error";
@@ -95,19 +71,7 @@ public class AuthScreen extends Screen {
 			} catch (InterruptedException | ExecutionException e) {
 				Reel.log.error("Error getting pow", e);
 			}
-			String pow512Rez = null;
-			try {
-				if (pow512Compute != null) pow512Rez = pow512Compute.get();
-			} catch (InterruptedException | ExecutionException e) {
-				Reel.log.error("Error getting pow", e);
-			}
-			String powArgon2Rez = null;
-			try {
-				if (powArgon2Compute != null) powArgon2Rez = powArgon2Compute.get();
-			} catch (InterruptedException | ExecutionException e) {
-				Reel.log.error("Error getting pow", e);
-			}
-			Tape.auth = new AuthObject(pass.getText(), powRez, pow512Rez, powArgon2Rez);
+			Tape.auth = new AuthObject(pass.getText(), powRez);
 		}).position(width/2-62, height/2+10).size(124, 20).build();
 		if (processCount.getAcquire() > 0){
 			button.setMessage(Text.of("Computing requirements"));

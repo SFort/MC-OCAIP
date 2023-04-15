@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class Reel {
 	public static final Logger log = LogManager.getLogger("OCAIP");
-	public static final int protocalVersion = 2;
+	public static final int protocolVersion = 3;
 	public static final EdDSAParameterSpec edParams = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 	public static final String dir = "ocaip";
 	public static final String skinDir = dir+"/skins";
