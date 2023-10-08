@@ -17,6 +17,10 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "MinecraftDedicatedServerEnforceProfile"
+    "MinecraftDedicatedServerEnforceProfile",
+    "OldLoginPacketClientMixin",
+    "OldLoginPacketServerMixin",
+    "OldPacketClientMixin",
+    "OldPacketServerMixin"
   ]
 }

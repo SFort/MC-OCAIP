@@ -13,7 +13,6 @@
   },
 
   "license": "MIT",
-  "accessWidener": "ocaip.accesswidener",
   "environment": "*",
   "mixins": [
     "ocaip.mixins.json"

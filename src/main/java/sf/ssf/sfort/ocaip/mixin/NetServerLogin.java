@@ -8,16 +8,19 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
+import net.minecraft.network.packet.c2s.login.LoginQueryResponsePayload;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import sf.ssf.sfort.ocaip.OldCustomPayload;
 import sf.ssf.sfort.ocaip.Reel;
 import sf.ssf.sfort.ocaip.Wire;
 
@@ -34,16 +37,21 @@ public abstract class NetServerLogin {
     boolean ocaip$shouldBypass = true;
 	byte[] ocaip$sentBytes = null;
 
-	@Shadow
-	ServerLoginNetworkHandler.State state;
 	@Shadow @Final
 	public ClientConnection connection;
 	@Shadow
 	GameProfile profile;
 	@Shadow
-	protected abstract GameProfile toOfflineProfile(GameProfile profile);
-	@Shadow
 	public abstract void disconnect(Text reason);
+
+	@Shadow
+	protected static GameProfile createOfflineProfile(String name) {
+		return null;
+	}
+
+	@Shadow protected abstract void sendSuccessPacket(GameProfile profile);
+
+	@Shadow private @Nullable String profileName;
 	private static final Random ocaip$random = new Random();
 
 	@Inject(at=@At("HEAD"), method="onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V")
@@ -65,17 +73,17 @@ public abstract class NetServerLogin {
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
-				requestCode,
+				requestCode, new OldCustomPayload(
 				new Identifier("ocaip", "request_auth"),
-				buf));
+				buf)));
 		ocaip$sentBytes = bytes;
 	}
 
 	@Inject(at = @At(value="INVOKE", target="Ljava/lang/Thread;start()V", shift=At.Shift.BEFORE), method="onKey(Lnet/minecraft/network/packet/c2s/login/LoginKeyC2SPacket;)V", cancellable=true)
 	public void bypassAuthPacket(CallbackInfo ci) {
-		this.profile = this.toOfflineProfile(this.profile);
+		this.profile = createOfflineProfile(this.profileName);
 		if (ocaip$hasBypassed && ocaip$shouldBypass) {
-			this.state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+			sendSuccessPacket(profile);
 			ci.cancel();
 		} else try {
 			if (Wire.requireOCAIP) {
@@ -88,17 +96,20 @@ public abstract class NetServerLogin {
 	}
 
 	@Inject(at = @At("HEAD"), method="onQueryResponse(Lnet/minecraft/network/packet/c2s/login/LoginQueryResponseC2SPacket;)V", cancellable=true)
-	public void bypassAuthPacket(LoginQueryResponseC2SPacket packet, CallbackInfo ci) {
-		int pid = packet.getQueryId();
+	public void bypassAuthPacket(LoginQueryResponseC2SPacket inPayload, CallbackInfo ci) {
+		int pid = inPayload.queryId();
+		LoginQueryResponsePayload payload = inPayload.response();
+		if (!(payload instanceof OldCustomPayload)) return;
+		OldCustomPayload packet = ((OldCustomPayload) payload);
         if (pid == 41809950) {
             ci.cancel();
-            PacketByteBuf buf = packet.getResponse();
+            PacketByteBuf buf = packet.buf;
             if (buf == null) return;
 			if (Wire.requireOCAIP) return;
 			ocaip$shouldBypass = false;
         } else if (pid == 41809951 || pid == 41809952) {
 			ci.cancel();
-			PacketByteBuf buf = packet.getResponse();
+			PacketByteBuf buf = packet.buf;
 			if (ocaip$sentBytes == null || buf == null) {
 				return;
 			}
@@ -108,7 +119,7 @@ public abstract class NetServerLogin {
 				return;
 			}
 			byte[] pubKeyRecv = buf.readByteArray();
-			String name = profile.getName();
+			String name = this.profileName;
 			byte[] recvBytes = buf.readByteArray();
 			PublicKey pubKey = Wire.keys.get(name);
 			EdDSAEngine engine = new EdDSAEngine();
@@ -133,7 +144,7 @@ public abstract class NetServerLogin {
 					String ip = connection.getAddress().toString();
 					int i = ip.lastIndexOf(':');
 					if (i!=-1) ip = ip.substring(0, i);
-					ip = profile.getName() + ip;
+					ip = name + ip;
 					if (!Wire.pow.sessionQueries.containsKey(ip)) {
 						this.disconnect(Text.literal("OCAIP: Server doesn't remember prompting sha1 proof of work"));
 						return;

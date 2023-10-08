@@ -9,8 +9,11 @@ import net.minecraft.client.network.ClientLoginNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
+import net.minecraft.network.packet.c2s.login.LoginQueryResponsePayload;
+import net.minecraft.network.packet.s2c.login.LoginQueryRequestPayload;
 import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import sf.ssf.sfort.ocaip.AuthScreen;
+import sf.ssf.sfort.ocaip.OldCustomPayload;
 import sf.ssf.sfort.ocaip.Reel;
 import sf.ssf.sfort.ocaip.Tape;
 
@@ -37,7 +41,7 @@ public abstract class NetClientLogin {
 	public void ignoreYggdrasilErr(CallbackInfoReturnable<Text> cir) {
 		if (ocaip$recivedRequest) {
 			if (cir.getReturnValue() == null){
-				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion)));
+				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new OldCustomPayload(new Identifier("ocaip", "null"), new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion))));
 			} else {
 				cir.setReturnValue(null);
 			}
@@ -45,13 +49,16 @@ public abstract class NetClientLogin {
 	}
 
 	@Inject(at=@At("HEAD"), method="onQueryRequest(Lnet/minecraft/network/packet/s2c/login/LoginQueryRequestS2CPacket;)V", cancellable=true)
-	public void bypassAuthPacket(LoginQueryRequestS2CPacket packet, CallbackInfo ci) {
-		int pid = packet.getQueryId();
+	public void bypassAuthPacket(LoginQueryRequestS2CPacket inPacket, CallbackInfo ci) {
+		int pid = inPacket.queryId();
+		LoginQueryRequestPayload payload = inPacket.payload();
+		if (!(payload instanceof OldCustomPayload)) return;
+		OldCustomPayload packet = (OldCustomPayload) payload;
 		if (pid == 41809951 || pid == 41809952) {
 			ci.cancel();
 			ocaip$recivedRequest = true;
-			PacketByteBuf buf = packet.getPayload();
-			if (buf == null) return;
+			PacketByteBuf buf = packet.buf;
+			if (buf.readableBytes() <= 0) return;
 			int version = buf.readVarInt();
 			if (pid != 41809951 && version <= 1) {
 				this.client.setScreen(new DisconnectedScreen(this.parentScreen, Text.of("OCAIP Disconnect"), Text.of("Server running an incompatible version of OCAIP")));
@@ -116,7 +123,7 @@ public abstract class NetClientLogin {
 				}
 			}
 			Tape.auth = null;
-			this.connection.send(new LoginQueryResponseC2SPacket(packet.getQueryId(), tbuf));
+			this.connection.send(new LoginQueryResponseC2SPacket(inPacket.queryId(), new OldCustomPayload(new Identifier("ocaip", "null"), tbuf)));
 		}
 	}
 

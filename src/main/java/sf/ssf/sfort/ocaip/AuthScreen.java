@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.client.network.ServerInfo;
 
@@ -54,7 +53,7 @@ public class AuthScreen extends Screen {
 			this.button.active = true;
 		}
 	}
-	public static ServerInfo dummyInfo = new ServerInfo("dummy", "0", true);
+	public static ServerInfo dummyInfo = new ServerInfo("dummy", "0", ServerInfo.ServerType.OTHER);
 	@Override
 	public void init() {
 		super.init();
@@ -88,7 +87,7 @@ public class AuthScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (client == null) return;
-		renderBackground(context);
+		renderBackground(context, mouseX, mouseY, delta);
 		context.drawTextWithShadow(textRenderer, text, (int)(width / 2f - textRenderer.getWidth(text) / 2f), (int)(height / 2f - 40), -1);
 		super.render(context, mouseX, mouseY, delta);
 	}
