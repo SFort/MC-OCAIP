@@ -16,7 +16,7 @@ public class OldPacketClientMixin {
 	@Inject(method="readPayload(Lnet/minecraft/util/Identifier;Lnet/minecraft/network/PacketByteBuf;)Lnet/minecraft/network/packet/CustomPayload;", at=@At("HEAD"), cancellable=true)
 	private static void oldPayload(Identifier id, PacketByteBuf buf, CallbackInfoReturnable<CustomPayload> cir){
 		if ("ocaip".equals(id.getNamespace())) {
-			cir.setReturnValue(new OldCustomPayload(buf));
+			cir.setReturnValue(new OldCustomPayload.Custom(buf));
 		}
 	}
 }

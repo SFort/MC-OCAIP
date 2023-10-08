@@ -29,7 +29,7 @@ public abstract class NetClientSync {
 	public void informAboutLocalSkins(CallbackInfo ci) {
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 		buf.writeMap(Reel.uuidToSkinHash, PacketByteBuf::writeString, PacketByteBuf::writeByteArray);
-		getConnection().send(new CustomPayloadC2SPacket(new OldCustomPayload(new Identifier("ocaip", "local_skins"), buf)));
+		getConnection().send(new CustomPayloadC2SPacket(new OldCustomPayload.Custom(new Identifier("ocaip", "local_skins"), buf)));
 	}
 
 	@Inject(at=@At("HEAD"), method= "onCustomPayload(Lnet/minecraft/network/packet/CustomPayload;)V", cancellable=true)
@@ -55,7 +55,7 @@ public abstract class NetClientSync {
 			}
 			case "request_skin": {
 				if (Tape.localSkin != null) {
-					getConnection().send(new CustomPayloadC2SPacket(new OldCustomPayload(new Identifier("ocaip", "set_skin"), new PacketByteBuf(Unpooled.buffer()).writeByteArray(Tape.localSkin))));
+					getConnection().send(new CustomPayloadC2SPacket(new OldCustomPayload.Custom(new Identifier("ocaip", "set_skin"), new PacketByteBuf(Unpooled.buffer()).writeByteArray(Tape.localSkin))));
 				}
 				break;
 			}

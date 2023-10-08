@@ -41,7 +41,7 @@ public abstract class NetClientLogin {
 	public void ignoreYggdrasilErr(CallbackInfoReturnable<Text> cir) {
 		if (ocaip$recivedRequest) {
 			if (cir.getReturnValue() == null){
-				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new OldCustomPayload(new Identifier("ocaip", "null"), new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion))));
+				this.connection.send(new LoginQueryResponseC2SPacket(41809950, new OldCustomPayload.LoginResponse(new Identifier("ocaip", "null"), new PacketByteBuf(Unpooled.buffer()).writeVarInt(Reel.protocolVersion))));
 			} else {
 				cir.setReturnValue(null);
 			}
@@ -123,7 +123,7 @@ public abstract class NetClientLogin {
 				}
 			}
 			Tape.auth = null;
-			this.connection.send(new LoginQueryResponseC2SPacket(inPacket.queryId(), new OldCustomPayload(new Identifier("ocaip", "null"), tbuf)));
+			this.connection.send(new LoginQueryResponseC2SPacket(inPacket.queryId(), new OldCustomPayload.LoginResponse(new Identifier("ocaip", "null"), tbuf)));
 		}
 	}
 

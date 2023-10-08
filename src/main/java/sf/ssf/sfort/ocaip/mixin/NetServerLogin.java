@@ -73,7 +73,7 @@ public abstract class NetServerLogin {
 			}
 		}
 		connection.send(new LoginQueryRequestS2CPacket(
-				requestCode, new OldCustomPayload(
+				requestCode, new OldCustomPayload.LoginRequest(
 				new Identifier("ocaip", "request_auth"),
 				buf)));
 		ocaip$sentBytes = bytes;

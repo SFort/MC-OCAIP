@@ -17,7 +17,7 @@ public class OldLoginPacketServerMixin {
 	private static void oldPayload(int queryId, PacketByteBuf buf, CallbackInfoReturnable<LoginQueryResponsePayload> cir){
 		if (queryId == 41809950 || queryId == 41809951 || queryId == 41809952) {
 			buf.skipBytes(1);
-			cir.setReturnValue(new OldCustomPayload(buf));
+			cir.setReturnValue(new OldCustomPayload.LoginResponse(buf));
 		}
 	}
 }

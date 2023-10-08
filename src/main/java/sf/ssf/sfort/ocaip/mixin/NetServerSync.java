@@ -54,7 +54,7 @@ public abstract class NetServerSync {
 						byte[] playerHash = recv.get(uuid);
 						byte[] serverPlayerHash = Reel.uuidToSkinHash.get(uuid);
 						if (playerHash != null && (serverPlayerHash == null || !Arrays.equals(serverPlayerHash, playerHash))) {
-							this.connection.send(new CustomPayloadS2CPacket(new OldCustomPayload(new Identifier("ocaip", "request_skin"), new PacketByteBuf(Unpooled.buffer()).writeString(uuid))));
+							this.connection.send(new CustomPayloadS2CPacket(new OldCustomPayload.Custom(new Identifier("ocaip", "request_skin"), new PacketByteBuf(Unpooled.buffer()).writeString(uuid))));
 						}
 					}
 					Map<String, byte[]> mismatched = new HashMap<>();
@@ -70,7 +70,7 @@ public abstract class NetServerSync {
 					if (!mismatched.isEmpty()) {
 						buf = new PacketByteBuf(Unpooled.buffer());
 						buf.writeMap(mismatched, PacketByteBuf::writeString, PacketByteBuf::writeByteArray);
-						this.connection.send(new CustomPayloadS2CPacket(new OldCustomPayload(new Identifier("ocaip", "new_skins"), buf)));
+						this.connection.send(new CustomPayloadS2CPacket(new OldCustomPayload.Custom(new Identifier("ocaip", "new_skins"), buf)));
 					}
 					break;
 				}
@@ -82,7 +82,7 @@ public abstract class NetServerSync {
 							Reel.writeSkin(uuid, skin);
 							buf = new PacketByteBuf(Unpooled.buffer());
 							buf.writeMap(Map.of(uuid, skin), PacketByteBuf::writeString, PacketByteBuf::writeByteArray);
-							CustomPayloadS2CPacket sendPckt = new CustomPayloadS2CPacket(new OldCustomPayload(new Identifier("ocaip", "new_skins"), buf));
+							CustomPayloadS2CPacket sendPckt = new CustomPayloadS2CPacket(new OldCustomPayload.Custom(new Identifier("ocaip", "new_skins"), buf));
 							for (ServerPlayerEntity spe : this.server.getPlayerManager().getPlayerList()) {
 								if (spe == player) continue;
 								spe.networkHandler.sendPacket(sendPckt);
