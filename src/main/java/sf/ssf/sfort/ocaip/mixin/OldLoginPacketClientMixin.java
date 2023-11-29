@@ -10,7 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import sf.ssf.sfort.ocaip.OldCustomPayload;
 
-@Mixin(LoginQueryRequestS2CPacket.class)
+//Priority to overrule fapi
+@Mixin(value=LoginQueryRequestS2CPacket.class, priority=200)
 public class OldLoginPacketClientMixin {
 
 	@Inject(method="readPayload(Lnet/minecraft/util/Identifier;Lnet/minecraft/network/PacketByteBuf;)Lnet/minecraft/network/packet/s2c/login/LoginQueryRequestPayload;", at=@At("HEAD"), cancellable=true)

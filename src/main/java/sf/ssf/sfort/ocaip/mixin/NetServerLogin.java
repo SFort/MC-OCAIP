@@ -30,7 +30,8 @@ import java.security.SignatureException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
 
-@Mixin(ServerLoginNetworkHandler.class)
+//low priority idk some fapi bullshit cba to check
+@Mixin(value=ServerLoginNetworkHandler.class, priority=200)
 public abstract class NetServerLogin {
 
 	boolean ocaip$hasBypassed = false;
