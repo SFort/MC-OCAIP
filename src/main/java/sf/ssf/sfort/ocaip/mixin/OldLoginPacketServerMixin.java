@@ -16,8 +16,11 @@ public class OldLoginPacketServerMixin {
 	@Inject(method="readPayload(ILnet/minecraft/network/PacketByteBuf;)Lnet/minecraft/network/packet/c2s/login/LoginQueryResponsePayload;", at=@At("HEAD"), cancellable=true)
 	private static void oldPayload(int queryId, PacketByteBuf buf, CallbackInfoReturnable<LoginQueryResponsePayload> cir){
 		if (queryId == 41809950 || queryId == 41809951 || queryId == 41809952) {
-			buf.skipBytes(1);
-			cir.setReturnValue(new OldCustomPayload.LoginResponse(buf));
+			if (buf.readBoolean()) {
+				cir.setReturnValue(new OldCustomPayload.LoginResponse(buf));
+			} else {
+				cir.setReturnValue(new OldCustomPayload.LoginResponse(new Identifier("ocaip_null", "vanilla_client"), null));
+			}
 		}
 	}
 }
