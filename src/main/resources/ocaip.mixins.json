@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "sf.ssf.sfort.ocaip.mixin",
   "compatibilityLevel": "JAVA_11",
+  "plugin": "sf.ssf.sfort.ocaip.mixin.MixinConfigPlugin",
   "server": [
     "NetServerLogin",
     "NetServerSync"

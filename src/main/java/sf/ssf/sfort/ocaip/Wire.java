@@ -1,7 +1,5 @@
 package sf.ssf.sfort.ocaip;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import tf.ssf.sfort.ini.SFIni;
 
@@ -18,7 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-@Environment(EnvType.SERVER)
+
 public class Wire {
 	public static final File conf = new File(Reel.dir+"/server_keys.sf.ini");
 
@@ -27,6 +25,7 @@ public class Wire {
 
 	public static POW pow = null;
 	public static boolean requireOCAIP = false;
+	public static boolean disableFAPIjank = true;
 
 	public static void addAndWrite(String name, PublicKey key) throws IOException {
 		if (!keys.containsKey(name)) {
@@ -105,7 +104,11 @@ public class Wire {
 				"; Registration sha1pow zero count (complexity, higher value is more time)",
 				"sha1pow.zero=",
 				"; Registration sha1pow count",
-				"sha1pow.count="
+				"sha1pow.count=",
+				"; FabricAPI has some really janky injections, this will remove them",
+				"; when true other mods logins that depend on fapi might break might not",
+				"; when false if fapi is installed players with a vanilla game won't be able to connect",
+				"disableFAPIlogin=true",
 		}));
 		loadLegacyConf(defIni);
 
@@ -171,6 +174,13 @@ public class Wire {
 			SFIni.Data d = ini.getLastData("requireOCAIP");
 			if (d != null) d.val = "false";
 			Reel.log.error("OCAIP failed to read requireOCAIP, reset to default", e);
+		}
+		try {
+			disableFAPIjank = ini.getBoolean("disableFAPIlogin");
+		} catch (IllegalArgumentException e) {
+			SFIni.Data d = ini.getLastData("disableFAPIlogin");
+			if (d != null) d.val = "true";
+			Reel.log.error("OCAIP failed to read disableFAPIlogin, reset to default", e);
 		}
 	}
 	public static void loadLegacyConf(SFIni ini) {
